@@ -24,6 +24,35 @@ describe("ProductTable", () => {
     expect(screen.getByRole("link", { name: "View Analysis" })).toBeInTheDocument();
   });
 
+  it("sorts Latest by the product date even when score order differs", () => {
+    const dated = [
+      { ...products[0], addedAt: "2026-09-01" },
+      { ...products[1], addedAt: "2026-10-02" },
+      { ...products[2], addedAt: "2026-09-20" },
+    ];
+    render(<ProductTable products={dated} selectedId="brush" onSelect={vi.fn()} onToggleWatchlist={vi.fn()} />);
+    fireEvent.click(screen.getByRole("tab", { name: "Latest" }));
+    expect(screen.getAllByRole("row").slice(1).map((row) => within(row).getByTestId("product-name").textContent)).toEqual([
+      "Rak Dapur Stainless 2 Tingkat", "Chopper Elektrik 2L Premium", "Sikat Pembersih Elektrik 3 in 1",
+    ]);
+  });
+
+  it("associates each score trigger with a unique visible tooltip outside the scroll area", () => {
+    render(<ProductTable products={products} selectedId="brush" onSelect={vi.fn()} onToggleWatchlist={vi.fn()} />);
+    const triggers = screen.getAllByRole("button", { name: /Opportunity score for/ });
+    const scrollArea = screen.getByRole("table").parentElement;
+    fireEvent.focus(triggers[0]);
+    const firstTooltip = screen.getByRole("tooltip");
+    expect(triggers[0]).toHaveAttribute("aria-describedby", firstTooltip.id);
+    expect(scrollArea).not.toContainElement(firstTooltip);
+    fireEvent.blur(triggers[0]);
+    fireEvent.focus(triggers[7]);
+    const lastTooltip = screen.getByRole("tooltip");
+    expect(triggers[7]).toHaveAttribute("aria-describedby", lastTooltip.id);
+    expect(lastTooltip.id).not.toBe(firstTooltip.id);
+    expect(scrollArea).not.toContainElement(lastTooltip);
+  });
+
   it("provides row selection, watchlist, column visibility, and pagination", () => {
     const onSelect = vi.fn();
     const onToggleWatchlist = vi.fn();

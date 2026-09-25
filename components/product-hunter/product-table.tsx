@@ -49,13 +49,14 @@ export function ProductTable({ products, selectedId, onSelect, onToggleWatchlist
     helper.accessor("commission", { id: "commission", header: "Commission", cell: ({ row }) => <span className="commission-cell"><strong>{row.original.commission}%</strong><small>≈ {formatRupiah(Math.round(row.original.price * row.original.commission / 100))}</small></span> }),
     helper.accessor("velocity", { id: "velocity", header: () => <>Velocity <CircleHelp size={12} aria-label="Sales growth" /></>, cell: ({ getValue }) => <span className="velocity-cell"><ArrowUp size={13} aria-hidden="true" />{getValue()}%</span> }),
     helper.accessor((product) => calculateOpportunityScore(product).score, { id: "score", header: "Score", cell: ({ row }) => <OpportunityScore product={row.original} onSelect={onSelect} /> }),
+    helper.accessor("addedAt", { id: "addedAt", header: "Latest", enableHiding: false }),
     helper.display({ id: "action", header: "Action", cell: ({ row }) => {
       const product = row.original;
       const isWatched = watched[product.id] ?? product.watched ?? false;
       return <span className="row-actions"><button type="button" aria-label={`${isWatched ? "Remove" : "Add"} ${product.name} ${isWatched ? "from" : "to"} watchlist`} className={isWatched ? "is-watched" : ""} onClick={() => { setWatched((current) => ({ ...current, [product.id]: !isWatched })); onToggleWatchlist(product.id); }}><Heart size={16} fill={isWatched ? "currentColor" : "none"} /></button><a href={product.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={`Search ${product.name} on Shopee`}><ExternalLink size={15} /></a></span>;
     } }),
   ]), [onSelect, onToggleWatchlist, selectedId, watched]);
-  const table = useTable({ features, data: products, columns, getRowId: (product) => product.id, initialState: { sorting: [{ id: "score", desc: true }], pagination: { pageIndex: 0, pageSize: 8 } } });
+  const table = useTable({ features, data: products, columns, getRowId: (product) => product.id, initialState: { sorting: [{ id: "score", desc: true }], pagination: { pageIndex: 0, pageSize: 8 }, columnVisibility: { addedAt: false } } });
   const { pageIndex, pageSize } = table.state.pagination;
   const pageCount = table.getPageCount();
   const selectedSort = table.state.sorting[0]?.id ?? "score";
