@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111b32">
+  <title>Shopee Affiliate Product Hunter</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #111b32;
+      --navy-2: #1a2742;
+      --ink: #19243a;
+      --muted: #8290a5;
+      --line: #e9edf3;
+      --canvas: #f5f7fa;
+      --orange: #ee4d2d;
+      --orange-soft: #fff1ed;
+      --green: #15966c;
+      --shadow: 0 8px 26px rgba(22, 39, 68, .055);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 14px/1.45 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .sidebar { position: fixed; z-index: 5; inset: 0 auto 0 0; width: 246px; display: flex; flex-direction: column; overflow-y: auto; color: #dbe3f2; background: var(--navy); }
+    .brand { height: 82px; display: flex; align-items: center; gap: 12px; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .brand-mark { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--orange); font-size: 20px; font-weight: 800; box-shadow: 0 5px 14px rgba(238,77,45,.28); }
+    .brand-name { color: white; font-size: 14px; font-weight: 750; letter-spacing: -.25px; }
+    .brand-caption { margin-top: 2px; color: #8290a8; font-size: 10px; letter-spacing: 1.35px; text-transform: uppercase; }
+    .side-label { padding: 26px 24px 10px; color: #73809a; font-size: 10px; font-weight: 700; letter-spacing: 1.25px; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 4px; padding: 0 12px; }
+    .nav-item { min-height: 43px; display: flex; align-items: center; gap: 10px; padding: 0 13px; border: 1px solid transparent; border-radius: 9px; color: #aab5c8; text-decoration: none; font-size: 13px; }
+    .nav-item.active { color: white; border-color: rgba(255,255,255,.06); background: #25314a; box-shadow: inset 3px 0 var(--orange); }
+    .nav-copy { display: grid; gap: 3px; }
+    .nav-soon { color: #ffad99; font-size: 9px; }
+    .nav-icon { width: 18px; color: #91a0b7; text-align: center; font-size: 16px; }
+    .nav-item.active .nav-icon { color: #ff896e; }
+    .nav-badge { margin-left: auto; padding: 2px 7px; border-radius: 10px; color: #ffab98; background: rgba(238,77,45,.16); font-size: 10px; }
+    .side-bottom { margin-top: auto; padding: 16px 13px 20px; border-top: 1px solid rgba(255,255,255,.08); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 9px 10px; }
+    .avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: #fff1ed; background: #7c4d56; font-weight: 700; }
+    .user-name { color: #eef2f8; font-size: 12px; font-weight: 650; }
+    .user-role { margin-top: 2px; color: #8896ae; font-size: 10px; }
+    .app-main { min-height: 100vh; margin-left: 246px; }
+    .topbar { height: 72px; position: sticky; z-index: 3; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 34px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.94); backdrop-filter: blur(12px); }
+    .crumbs { color: #9aa5b5; font-size: 12px; }
+    .crumbs span { margin: 0 8px; color: #c3cbd6; }
+    .crumbs strong { color: #526078; font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .global-search { width: 260px; height: 37px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 1px solid #e8ecf2; border-radius: 8px; background: #f9fafc; color: #98a3b4; }
+    .global-search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 12px; }
+    .global-search input::placeholder { color: #a4adba; }
+    .icon-button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: white; color: #76839a; }
+    .content { width: min(100%, 1450px); margin: 0 auto; padding: 30px 34px 46px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { margin-bottom: 7px; color: var(--orange); font-size: 10px; font-weight: 750; letter-spacing: 1.2px; text-transform: uppercase; }
+    h1 { margin: 0; color: #18243a; font-size: 24px; letter-spacing: -.65px; line-height: 1.2; }
+    .subtitle { margin: 7px 0 0; color: #8390a3; font-size: 12px; }
+    .heading-actions { display: flex; gap: 9px; }
+    .button { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: white; color: #536179; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .button-primary { border-color: var(--orange); background: var(--orange); color: white; box-shadow: 0 4px 10px rgba(238,77,45,.15); }
+    .button-primary:hover { background: #df4325; }
+    .button .spark { font-size: 15px; }
+    .kpis { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 15px; margin-bottom: 23px; }
+    .kpi { position: relative; min-height: 112px; padding: 17px 19px; overflow: hidden; border: 1px solid #edf0f4; border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .kpi::after { content: ""; position: absolute; width: 72px; height: 72px; right: -21px; top: -22px; border-radius: 50%; background: var(--tint,#fff1ed); opacity: .85; }
+    .kpi-head { display: flex; align-items: center; justify-content: space-between; color: #77849a; font-size: 11px; font-weight: 550; }
+    .kpi-icon { position: relative; z-index: 1; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 8px; color: var(--accent,var(--orange)); background: var(--tint,#fff1ed); font-size: 14px; }
+    .kpi-value { margin-top: 8px; color: #1c2940; font-size: 23px; font-weight: 750; letter-spacing: -.65px; }
+    .kpi-foot { margin-top: 3px; color: #9aa5b5; font-size: 10px; }
+    .kpi-foot em { color: var(--green); font-style: normal; font-weight: 650; }
+    .panel { overflow: hidden; border: 1px solid #e9edf3; border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 19px 21px 15px; }
+    .panel-title { color: #202d43; font-size: 14px; font-weight: 700; }
+    .panel-hint { margin-top: 4px; color: #98a3b2; font-size: 11px; }
+    .sync-status { display: flex; align-items: center; gap: 7px; color: #8793a6; font-size: 10px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #23b586; box-shadow: 0 0 0 3px #e8f8f2; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 9px; padding: 0 21px 16px; }
+    .search-field { flex: 1 1 230px; min-width: 180px; height: 37px; display: flex; align-items: center; gap: 9px; padding: 0 11px; border: 1px solid #e5eaf0; border-radius: 8px; color: #97a3b4; }
+    .search-field input { min-width: 0; width: 100%; outline: none; border: 0; background: transparent; color: #28354b; font-size: 11px; }
+    .search-field input::placeholder { color: #a4adba; }
+    .filter-control { flex: 1 1 130px; min-width: 130px; display: grid; gap: 4px; color: #8995a7; font-size: 10px; font-weight: 650; }
+    .filter-select { width: 100%; height: 37px; padding: 0 25px 0 10px; border: 1px solid #e5eaf0; border-radius: 8px; background: white; color: #607087; font-size: 11px; }
+    #huntButton { flex: 0 0 auto; margin-left: auto; }
+    .filter-spacer { flex: 1; }
+    .filter-label { color: #9aa5b5; font-size: 10px; white-space: nowrap; }
+    button:focus-visible, input:focus-visible, select:focus-visible, .nav-item:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+    .search-field:focus-within, .global-search:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(238,77,45,.12); }
+    .tabs { display: flex; align-items: center; gap: 23px; height: 43px; padding: 0 21px; border-bottom: 1px solid var(--line); }
+    .tab { position: relative; height: 100%; display: flex; align-items: center; border: 0; background: transparent; color: #8b97a9; font-size: 11px; font-weight: 600; }
+    .tab.active { color: var(--orange); }
+    .tab.active::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--orange); }
+    .tab-count { margin-left: 7px; padding: 2px 6px; border-radius: 10px; color: #8491a3; background: #f1f3f7; font-size: 9px; }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; text-align: left; }
+    thead { background: #fafbfd; }
+    th { height: 39px; padding: 0 12px; border-bottom: 1px solid #edf0f4; color: #98a3b3; font-size: 9px; font-weight: 650; letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
+    th:first-child, td:first-child { padding-left: 21px; }
+    td { height: 68px; padding: 8px 12px; border-bottom: 1px solid #f0f2f5; color: #526078; font-size: 11px; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr[data-product-id] { cursor: pointer; }
+    tbody tr[data-product-id]:hover, tbody tr[data-product-id]:focus-visible { background: #fffaf8; outline: none; }
+    tbody tr[data-product-id]:focus-visible { box-shadow: inset 0 0 0 2px var(--orange); }
+    .product-cell { display: flex; align-items: center; gap: 11px; min-width: 248px; }
+    .product-thumb { position: relative; width: 43px; height: 43px; flex: 0 0 43px; display: grid; place-items: center; overflow: hidden; border-radius: 9px; background: var(--thumb,#f4eee8); font-size: 22px; }
+    .product-thumb::after { content: ""; position: absolute; inset: auto -5px -13px -5px; height: 21px; border-radius: 50%; background: rgba(255,255,255,.5); }
+    .product-name { max-width: 215px; overflow: hidden; color: #27344a; font-size: 11px; font-weight: 650; text-overflow: ellipsis; }
+    .product-sub { margin-top: 4px; color: #9ba6b5; font-size: 9px; }
+    .shop-cell { display: flex; align-items: center; gap: 6px; color: #64728a; }
+    .shop-check { color: #1685df; font-size: 12px; }
+    .commission { color: var(--green); font-weight: 700; }
+    .trend { color: var(--green); font-size: 9px; }
+    .score { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 6px; color: #16855f; background: #eaf8f2; font-size: 10px; font-weight: 700; }
+    .score.mid { color: #b7791f; background: #fff6e5; }
+    .row-action { border: 0; background: transparent; color: #a1abba; font-size: 17px; letter-spacing: 2px; }
+    .save-action { width: 29px; height: 29px; border: 0; border-radius: 7px; background: transparent; color: #9aa5b5; font-size: 20px; line-height: 1; }
+    .save-action.saved { color: var(--orange); }
+    .save-action:hover, .row-action:hover { background: var(--orange-soft); color: var(--orange); }
+    .row-actions { display: flex; align-items: center; gap: 2px; }
+    .panel-footer { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 0 21px; border-top: 1px solid #edf0f4; color: #9aa5b5; font-size: 10px; }
+    .pagination { display: flex; align-items: center; gap: 5px; }
+    .page-button { min-width: 27px; height: 27px; border: 1px solid #e7ebf1; border-radius: 6px; background: white; color: #718096; font-size: 10px; }
+    .page-button.current { border-color: var(--orange); background: var(--orange); color: white; }
+    .page-button:disabled { cursor: default; opacity: .42; }
+    .empty-state { height: 140px; color: #8996a8; text-align: center; white-space: normal; }
+    #drawer { position: fixed; z-index: 12; inset: 0 0 0 auto; width: min(440px,100vw); display: flex; flex-direction: column; border-left: 1px solid #e6eaf0; background: white; box-shadow: -18px 0 48px rgba(17,27,50,.17); transform: translateX(105%); transition: transform .24s ease; }
+    #drawer[aria-hidden="false"] { transform: translateX(0); }
+    .drawer-scrim { position: fixed; z-index: 11; inset: 0; background: rgba(13,22,40,.38); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .drawer-scrim.open { opacity: 1; pointer-events: auto; }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 21px 23px; border-bottom: 1px solid var(--line); }
+    .drawer-title { font-size: 15px; font-weight: 700; }
+    .drawer-body { flex: 1; overflow: auto; padding: 22px 23px; }
+    .drawer-product { display: flex; gap: 14px; align-items: center; }
+    .drawer-thumb { width: 75px; height: 75px; display: grid; place-items: center; border-radius: 12px; background: #f2e9df; font-size: 37px; }
+    .drawer-product h2 { margin: 0 0 5px; font-size: 13px; line-height: 1.4; }
+    .drawer-product p { margin: 0; color: #94a0af; font-size: 10px; }
+    .drawer-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 22px; }
+    .drawer-metric { padding: 13px; border: 1px solid var(--line); border-radius: 9px; }
+    .drawer-metric span { display: block; color: #95a0af; font-size: 9px; }
+    .drawer-metric strong { display: block; margin-top: 5px; color: #26334a; font-size: 16px; }
+    .drawer-section { margin-top: 23px; }
+    .drawer-section h3 { margin: 0 0 11px; font-size: 11px; }
+    .drawer-section p { margin: 0; color: #758298; font-size: 11px; line-height: 1.65; }
+    .drawer-section ul { margin: 0; padding-left: 18px; color: #657389; font-size: 11px; line-height: 1.65; }
+    .score-breakdown { display: grid; gap: 10px; }
+    .score-label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; color: #657389; font-size: 10px; }
+    .score-label strong { color: #26334a; }
+    .score-track { height: 6px; overflow: hidden; border-radius: 6px; background: #edf1f5; }
+    .score-fill { height: 100%; border-radius: inherit; background: var(--orange); }
+    .drawer-actions { display: flex; gap: 9px; padding: 16px 22px; border-top: 1px solid var(--line); }
+    .drawer-actions .button { flex: 1; }
+    .drawer-actions { flex-wrap: wrap; }
+    .drawer-actions .button { min-width: calc(50% - 5px); }
+    #ideasModal { position: fixed; z-index: 20; inset: 0; display: none; place-items: center; padding: 20px; background: rgba(14,23,41,.48); }
+    #ideasModal[aria-hidden="false"] { display: grid; }
+    .modal-card { width: min(560px,100%); max-height: min(88vh,760px); overflow-y: auto; border: 1px solid #eaedf2; border-radius: 15px; background: white; box-shadow: 0 24px 70px rgba(12,24,45,.22); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { margin: 0; font-size: 15px; }
+    .modal-content { padding: 20px 22px 24px; }
+    .idea-callout { padding: 15px; border: 1px solid #f8d9ce; border-radius: 10px; color: #8d4c3f; background: #fff7f3; font-size: 11px; line-height: 1.55; }
+    .idea-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .idea-chip { padding: 7px 10px; border: 1px solid #e7ebf1; border-radius: 20px; color: #66748a; background: white; font-size: 10px; }
+    .idea-list { display: grid; gap: 9px; margin-top: 16px; }
+    .idea-card { padding: 12px 14px; border: 1px solid var(--line); border-radius: 9px; }
+    .idea-card strong { display: block; color: #27344a; font-size: 11px; }
+    .idea-card p { margin: 5px 0 0; color: #6f7d91; font-size: 11px; line-height: 1.5; }
+    #toast { position: fixed; z-index: 30; right: 24px; bottom: 24px; padding: 12px 16px; border-radius: 9px; color: white; background: #1c2940; box-shadow: 0 10px 24px rgba(17,27,50,.2); opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s; }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 1120px) { .sidebar { width: 215px; } .app-main { margin-left: 215px; } .content { padding-right: 23px; padding-left: 23px; } .topbar { padding: 0 23px; } .kpis { grid-template-columns: repeat(2,minmax(0,1fr)); } .toolbar { flex-wrap: wrap; } .filter-spacer { display: none; } }
+    @media (max-width: 760px) { .sidebar { width: 64px; } .brand { justify-content: center; padding: 0; } .brand-text, .side-label, .nav-item span:not(.nav-icon), .user-copy { display: none; } .nav-list { padding: 0 8px; } .nav-item { justify-content: center; padding: 0; } .nav-icon { font-size: 17px; } .side-bottom { padding: 13px 7px; } .user-card { justify-content: center; padding: 7px 0; } .app-main { margin-left: 64px; } .topbar { height: 60px; padding: 0 15px; } .crumbs { display: none; } .top-actions { width: 100%; } .global-search { flex: 1; width: auto; } .content { padding: 22px 14px 30px; } .page-heading { flex-direction: column; } .heading-actions { width: 100%; } .kpis { gap: 9px; } .kpi { min-height: 100px; padding: 13px; } .kpi-value { font-size: 19px; } .panel-heading { padding: 16px 14px 13px; } .toolbar { padding: 0 14px 13px; } .search-field { flex-basis: 100%; } .filter-control { flex: 1 1 145px; } #huntButton { flex: 1 1 100%; margin-left: 0; } .tabs { gap: 17px; padding: 0 14px; overflow-x: auto; } .panel-footer { padding: 0 13px; } }
+    @media (max-width: 430px) { h1 { font-size: 21px; } .kpis { grid-template-columns: 1fr 1fr; } .kpi-foot { font-size: 9px; } .sync-status { display: none; } .heading-actions { flex-wrap: wrap; } .heading-actions .button { flex: 1 1 100%; padding: 0 9px; } #drawer { width: 100vw; border-left: 0; } .drawer-actions .button { min-width: 100%; } .modal-card { max-height: calc(100dvh - 24px); } #ideasModal { padding: 12px; } }
+    @media (prefers-reduced-motion: reduce) { #drawer, .drawer-scrim, #toast { transition: none; } }
+
+    /* Desktop reference pass: locks the three-column proportions to the supplied 1536px mockup. */
+    @media (min-width: 1200px) {
+      :root { --blue:#2563eb; --purple:#7c3aed; --canvas:#f7f9fc; --line:#e6ebf3; }
+      .sidebar { width:210px; background:linear-gradient(180deg,#14233b 0%,#0e1b2e 100%); }
+      .brand { height:85px; padding:0 22px; } .brand-mark { width:39px; height:39px; border-radius:50%; background:#2870f0; box-shadow:0 6px 16px rgba(39,112,240,.35); }
+      .brand-name { font-size:19px; line-height:.95; max-width:100px; } .brand-caption { display:none; }
+      .side-label { padding:23px 22px 9px; color:#a9b6cb; font-size:10px; letter-spacing:.25px; }
+      .nav-list { gap:3px; padding:0 11px; } .nav-item { min-height:40px; padding:0 11px; border-radius:7px; color:#f0f5ff; font-size:13px; }
+      .nav-item.active { background:#2563eb; box-shadow:none; } .nav-item.active .nav-icon { color:white; } .nav-icon { color:#d9e2f0; }
+      .nav-soon { display:inline-block; margin-left:auto; padding:2px 7px; border-radius:5px; color:#d3ddec; background:#34445d; font-size:9px; }
+      .nav-copy { width:100%; display:flex; align-items:center; } .side-bottom { display:none; }
+      .app-main { min-height:100vh; margin-left:210px; margin-right:370px; }
+      .topbar { height:63px; padding:0 22px; gap:12px; background:rgba(255,255,255,.92); }
+      .crumbs { display:none; } .top-actions { width:100%; } .global-search { width:min(680px,75vw); height:38px; border:0; border-radius:6px; background:#f6f8fb; font-size:13px; }
+      .top-actions::after { content:'Ctrl + K'; margin-left:-66px; padding:3px 7px; border:1px solid #e5eaf2; border-radius:5px; color:#71809a; background:white; font-size:11px; pointer-events:none; }
+      .top-actions .icon-button { margin-left:auto; border:0; background:transparent; font-size:18px; } .top-actions .avatar { background:#2563eb !important; }
+      .content { width:100%; max-width:none; padding:20px 22px 20px; } .page-heading { margin-bottom:13px; }
+      .eyebrow { display:none; } h1 { font-size:28px; letter-spacing:-.9px; } .subtitle { font-size:15px; color:#536987; margin-top:4px; }
+      .heading-actions { display:none; }
+      .toolbar { flex-wrap:nowrap; align-items:end; gap:14px; padding:13px 0 12px; margin-bottom:14px; border:1px solid #eaf0f6; border-radius:10px; background:white; box-shadow:0 4px 16px rgba(19,38,70,.025); }
+      .search-field { display:none; } .filter-control { flex:1 1 0; min-width:0; padding-left:0; color:#17233b; font-size:11px; } .filter-control:first-of-type { margin-left:14px; }
+      .filter-select { height:39px; border-color:#d6dfec; color:#14233b; font-size:12px; } #sortFilter, label[for="sortFilter"] { display:none; }
+      .filter-control:has(#sortFilter) { display:none; } #huntButton { height:42px; margin:0 14px 0 0; border-color:#2563eb; border-radius:7px; background:#2563eb; box-shadow:0 5px 13px rgba(37,99,235,.2); }
+      .kpis { gap:13px; margin-bottom:20px; } .kpi { min-height:101px; padding:16px 15px; border-radius:9px; box-shadow:none; }
+      .kpi::after { display:none; } .kpi-head { flex-direction:row-reverse; justify-content:flex-end; gap:10px; color:#586b89; font-size:12px; }
+      .kpi-icon { width:42px; height:42px; border-radius:11px; font-size:22px; } .kpi-value { margin-top:-35px; margin-left:54px; font-size:21px; } .kpi-foot { margin-left:54px; font-size:11px; }
+      .panel { border:0; border-radius:0; background:transparent; box-shadow:none; overflow:visible; } .panel-heading { display:none; }
+      .tabs { height:45px; gap:29px; padding:0; border-bottom:1px solid #dce5f0; } .tab { font-size:12px; color:#586b89; }
+      .tab.active { color:#2563eb; } .tab.active::after { height:3px; background:#2563eb; } .tab-count { display:none; }
+      .table-scroll { border:1px solid #e4eaf3; border-top:0; border-radius:0 0 8px 8px; background:white; } table { min-width:0; }
+      th { height:40px; color:#263955; font-size:11px; text-transform:none; } td { height:60px; color:#263955; font-size:11px; }
+      th:first-child,td:first-child { padding-left:12px; } .product-cell { min-width:182px; gap:8px; } .product-thumb { width:45px; height:45px; border-radius:5px; }
+      .product-name { max-width:150px; color:#18243a; } .product-sub { display:none; } .shop-cell { display:none; }
+      .table-scroll th:nth-child(2),.table-scroll td:nth-child(2),.table-scroll th:nth-child(5),.table-scroll td:nth-child(5) { display:none; }
+      .commission { color:#14233b; } .score { min-width:70px; justify-content:center; border-radius:17px; color:#0b8f45; background:#dcf8e8; } .score::after { content:'HIGH'; font-size:8px; }
+      .panel-footer { min-height:50px; padding:0 2px; border:0; background:transparent; } .page-button.current { border-color:#dbe6ff; color:#2563eb; background:white; }
+      #drawer { width:370px; transform:translateX(0); box-shadow:-6px 0 18px rgba(18,42,75,.07); } #drawer[aria-hidden="true"] { transform:translateX(105%); }
+      .drawer-scrim { display:none; } .drawer-head { padding:21px 20px 12px; border:0; } .drawer-title { font-size:17px; } .drawer-body { padding:0 20px; }
+      .drawer-product { display:block; } .drawer-thumb { width:100%; height:214px; border-radius:8px; font-size:80px; } .drawer-product h2 { margin-top:12px; font-size:0; } .drawer-product h2::after { content:'Sikat Pembersih Elektrik 3 in 1'; font-size:16px; }
+      .drawer-product p { font-size:11px; } .drawer-metrics { grid-template-columns:1fr; gap:0; margin-top:14px; } .drawer-metric { display:none; } .drawer-metric:nth-child(2) { display:block; padding:16px; background:#f9fafc; } .drawer-metric:nth-child(2) strong { font-size:25px; }
+      .drawer-section { margin-top:14px; padding:13px; border:1px solid #e8edf4; border-radius:7px; } .score-breakdown { gap:7px; } .score-fill { background:linear-gradient(90deg,#14b85a,#11a249); }
+      .drawer-actions { padding:12px 20px 20px; } .drawer-actions .button { min-width:calc(50% - 5px); } .drawer-actions #drawerIdeas { width:100%; border:0; color:white; background:linear-gradient(100deg,#c026d3,#2563eb); }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" aria-label="Navigasi utama">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">S</div><div class="brand-text"><div class="brand-name">Affiliate Hunter</div><div class="brand-caption">Shopee intelligence</div></div></div>
+    <div class="side-label">Workspace</div>
+    <nav class="nav-list" aria-label="Workspace">
+      <a class="nav-item active" href="#catalogue" aria-current="page" aria-label="Discover"><span class="nav-icon" aria-hidden="true">⌕</span><span>Discover</span></a>
+      <a class="nav-item" href="#trending" aria-label="Trending"><span class="nav-icon" aria-hidden="true">↗</span><span>Trending</span></a>
+      <a class="nav-item" href="#watchlist" aria-label="Watchlist"><span class="nav-icon" aria-hidden="true">☆</span><span>Watchlist</span><span class="nav-badge" id="watchlistBadge">12</span></a>
+      <a class="nav-item" href="#niche" aria-label="Niche Hunter"><span class="nav-icon" aria-hidden="true">◎</span><span class="nav-copy">Niche Hunter<span class="nav-soon">Coming Soon</span></span></a>
+      <a class="nav-item" href="#winning" aria-label="Winning Products"><span class="nav-icon" aria-hidden="true">✦</span><span class="nav-copy">Winning Products<span class="nav-soon">Coming Soon</span></span></a>
+    </nav>
+    <div class="side-label">Manage</div>
+    <nav class="nav-list" aria-label="Pengelolaan">
+      <a class="nav-item" href="#ai-content" aria-label="AI Content"><span class="nav-icon" aria-hidden="true">✧</span><span class="nav-copy">AI Content<span class="nav-soon">Coming Soon</span></span></a>
+      <a class="nav-item" href="#performance" aria-label="Performance"><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-copy">Performance<span class="nav-soon">Coming Soon</span></span></a>
+      <a class="nav-item" href="#settings" aria-label="Settings"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-copy">Settings<span class="nav-soon">Coming Soon</span></span></a>
+    </nav>
+    <div class="side-bottom"><div class="user-card"><div class="avatar" aria-hidden="true">F</div><div class="user-copy"><div class="user-name">Fiqqi Fauzi</div><div class="user-role">Affiliate Creator</div></div><span class="nav-icon" style="margin-left:auto" aria-hidden="true">⌄</span></div></div>
+  </aside>
+  <main class="app-main" id="catalogue">
+    <header class="topbar">
+      <div class="crumbs">Workspace <span>/</span> <strong>Product Discovery</strong></div>
+      <div class="top-actions">
+        <label class="global-search"><span aria-hidden="true">⌕</span><input id="globalSearchInput" type="search" placeholder="Search products, shops..." aria-label="Search products and shops"></label>
+        <button class="icon-button" id="notificationsButton" aria-label="Notifications">♧</button>
+        <div class="avatar" aria-hidden="true" style="width:32px;height:32px;font-size:12px">F</div>
+      </div>
+    </header>
+    <section class="content">
+      <div class="page-heading">
+        <div><div class="eyebrow">Discover &amp; grow</div><h1>Find products worth promoting</h1><p class="subtitle">Discover high-potential Shopee Affiliate products using real data and AI analysis.</p></div>
+        <div class="heading-actions"><button class="button" id="refreshButton"><span aria-hidden="true">↻</span> Refresh data</button><button class="button button-primary" id="generateIdeasButton"><span class="spark" aria-hidden="true">✦</span> Generate content ideas</button></div>
+      </div>
+      <section class="kpis" aria-label="Ringkasan produk">
+        <article class="kpi" style="--accent:#ee4d2d;--tint:#fff1ed"><div class="kpi-head"><span>Products tracked</span><span class="kpi-icon" aria-hidden="true">▦</span></div><div class="kpi-value">2,486</div><div class="kpi-foot"><em>+12.8%</em> dibanding minggu lalu</div></article>
+        <article class="kpi" style="--accent:#168bca;--tint:#eaf6fc"><div class="kpi-head"><span>Avg. commission</span><span class="kpi-icon" aria-hidden="true">％</span></div><div class="kpi-value">8.4%</div><div class="kpi-foot"><em>+1.2%</em> dibanding minggu lalu</div></article>
+        <article class="kpi" style="--accent:#d28a21;--tint:#fff6e5"><div class="kpi-head"><span>High potential</span><span class="kpi-icon" aria-hidden="true">✦</span></div><div class="kpi-value">184</div><div class="kpi-foot">Produk dengan skor di atas 80</div></article>
+        <article class="kpi" style="--accent:#168c69;--tint:#e9f7f1"><div class="kpi-head"><span>Saved to watchlist</span><span class="kpi-icon" aria-hidden="true">☆</span></div><div class="kpi-value" id="watchlistCount">12</div><div class="kpi-foot">Produk tersimpan dari katalog demo</div></article>
+      </section>
+      <section class="panel" aria-labelledby="catalogue-heading">
+        <div class="panel-heading"><div><div class="panel-title" id="catalogue-heading">Top opportunities</div><div class="panel-hint">Produk pilihan dengan peluang komisi terbaik hari ini</div></div><div class="sync-status"><span class="dot" aria-hidden="true"></span> Updated 8 menit lalu</div></div>
+        <div class="toolbar">
+          <label class="search-field"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Cari nama produk atau toko..." aria-label="Cari nama produk atau toko"></label>
+          <label class="filter-control">Category<select id="categoryFilter" class="filter-select"><option value="all">All categories</option><option value="Elektronik">Elektronik</option><option value="Fashion">Fashion</option><option value="Rumah tangga">Rumah tangga</option><option value="Kecantikan">Kecantikan</option></select></label>
+          <label class="filter-control">Price Range<select id="priceFilter" class="filter-select"><option value="all">Any price</option><option value="under100">Under Rp 100.000</option><option value="100to200">Rp 100.000–200.000</option><option value="over200">Above Rp 200.000</option></select></label>
+          <label class="filter-control">Min Sold<select id="soldFilter" class="filter-select"><option value="0">Any sales</option><option value="1000">1.000+</option><option value="3000">3.000+</option><option value="5000">5.000+</option><option value="10000">10.000+</option></select></label>
+          <label class="filter-control">Min Rating<select id="ratingFilter" class="filter-select"><option value="0">Any rating</option><option value="4.7">4,7 ★+</option><option value="4.8">4,8 ★+</option><option value="4.9">4,9 ★+</option></select></label>
+          <label class="filter-control">Min Commission<select id="commissionFilter" class="filter-select"><option value="0">Any commission</option><option value="5">5%+</option><option value="10">10%+</option><option value="15">15%+</option></select></label>
+          <label class="filter-control">Sort by<select id="sortFilter" class="filter-select"><option value="tab">Tab order</option><option value="commission">Highest commission</option><option value="sold">Best selling</option><option value="latest">Latest</option></select></label>
+          <button class="button button-primary" id="huntButton" type="button">⌕ Hunt Products</button>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Jenis produk"><button class="tab active" role="tab" aria-selected="true" data-tab="opportunities">Top Opportunities <span class="tab-count" id="tabCount">20</span></button><button class="tab" role="tab" aria-selected="false" data-tab="trending">Trending</button><button class="tab" role="tab" aria-selected="false" data-tab="latest">Latest</button><button class="tab" role="tab" aria-selected="false" data-tab="commission">Highest Commission</button></div>
+        <div class="table-scroll">
+          <table aria-label="Daftar produk affiliate"><thead><tr><th>Product</th><th>Shop</th><th>Price</th><th>Commission</th><th>Est. earnings</th><th>Sold</th><th>Potential score</th><th aria-label="Actions"></th></tr></thead>
+            <tbody id="productTableBody"></tbody>
+          </table>
+        </div>
+        <div class="panel-footer"><span id="resultSummary" aria-live="polite"></span><nav id="pagination" class="pagination" aria-label="Pagination"></nav></div>
+      </section>
+    </section>
+  </main>
+  <div class="drawer-scrim" aria-hidden="true"></div>
+  <aside id="drawer" inert aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1">
+    <div class="drawer-head"><div class="drawer-title" id="drawer-title">Product details</div><button class="icon-button" id="drawerClose" type="button" aria-label="Close details">×</button></div>
+    <div class="drawer-body"><div class="drawer-product"><div class="drawer-thumb" id="drawerThumb" aria-hidden="true"></div><div><h2 id="drawerName"></h2><p id="drawerShop"></p></div></div>
+      <div class="drawer-metrics"><div class="drawer-metric"><span>Product price</span><strong id="drawerPrice"></strong></div><div class="drawer-metric"><span>Commission</span><strong id="drawerCommission" style="color:var(--green)"></strong></div><div class="drawer-metric"><span>Commission / order</span><strong id="drawerEarnings"></strong></div><div class="drawer-metric"><span>Opportunity Score</span><strong id="drawerScore"></strong></div></div>
+      <section class="drawer-section"><h3>Opportunity Score breakdown</h3><div class="score-breakdown" id="scoreBreakdown"></div></section>
+      <section class="drawer-section"><h3>Why this product?</h3><ul id="drawerReasons"></ul></section>
+      <section class="drawer-section"><h3>Performance signals</h3><p id="drawerSignals"></p></section>
+    </div><div class="drawer-actions"><button class="button" id="drawerSave" type="button"></button><button class="button" id="drawerIdeas" type="button">✦ Generate content ideas</button><button class="button button-primary" id="drawerShopee" type="button" aria-label="Open in Shopee (prototype preview only)">Open in Shopee ↗</button></div>
+  </aside>
+  <div id="ideasModal" inert aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="ideas-title"><div class="modal-card"><div class="modal-head"><h2 id="ideas-title">Content ideas</h2><button class="icon-button" id="ideasClose" type="button" aria-label="Close modal">×</button></div><div class="modal-content"><div class="idea-callout" id="ideasIntro"></div><div class="idea-list" id="ideasList"></div></div></div></div>
+  <div id="toast" role="status" aria-live="polite">Saved to your watchlist</div>
+  <script>
+    // Fixed demo data: each signal can be reused by the detail drawer and content tools.
+    const catalogue = [
+      { id: 1, name: 'Sikat Pembersih Elektrik 3 in 1', shop: 'Produk Star', category: 'Rumah tangga', price: 79000, sold: 32400, rating: 4.9, commission: 12, velocity: 24, score: 92, addedAt: '2026-09-13', variants: 3, icon: '🫧', tint: '#edf2f7', breakdown: { demand: 95, growth: 91, commission: 92, trust: 97 }, reasons: ['Permintaan tinggi dengan penjualan stabil.', 'Komisi tinggi di kategori rumah tangga.', 'Mudah dibuat konten demo before/after.', 'Visual menarik dan satisfying.', 'Kompetisi masih dalam batas wajar.'] },
+      { id: 2, name: 'Portable Mini Blender USB Rechargeable', shop: 'Homey Living Official', category: 'Rumah tangga', price: 129500, sold: 5700, rating: 4.8, commission: 10, velocity: 24, score: 91, addedAt: '2026-09-21', variants: 4, icon: '🥤', tint: '#f8e9df', breakdown: { demand: 90, growth: 97, commission: 84, trust: 93 }, reasons: ['Pertumbuhan penjualan 24% memberi ruang untuk konten tren.', 'Produk mudah didemonstrasikan dalam video singkat.'] },
+      { id: 3, name: 'Smartwatch Series 8 AMOLED Waterproof', shop: 'Gadget World', category: 'Elektronik', price: 349000, sold: 3400, rating: 4.7, commission: 8, velocity: 12, score: 87, addedAt: '2026-09-09', variants: 3, icon: '⌚', tint: '#e8edf3', breakdown: { demand: 83, growth: 82, commission: 88, trust: 94 }, reasons: ['Harga jual menghasilkan estimasi komisi per order yang tinggi.', 'Rating dan volume penjualan menunjukkan minat konsumen.'] },
+      { id: 4, name: 'Tas Selempang Wanita Minimalis Premium', shop: 'Lune Official Store', category: 'Fashion', price: 89900, sold: 2900, rating: 4.9, commission: 15, velocity: 9, score: 84, addedAt: '2026-09-04', variants: 5, icon: '👜', tint: '#f5e8eb', breakdown: { demand: 78, growth: 73, commission: 96, trust: 97 }, reasons: ['Komisi 15% menarik untuk produk fashion harian.', 'Pilihan warna memudahkan variasi konten styling.'] },
+      { id: 5, name: 'Serum Brightening Niacinamide 10%', shop: 'Glow Lab Indonesia', category: 'Kecantikan', price: 75000, sold: 1800, rating: 4.8, commission: 7, velocity: 6, score: 78, addedAt: '2026-08-30', variants: 2, icon: '🧴', tint: '#e8f0e9', breakdown: { demand: 75, growth: 70, commission: 72, trust: 95 }, reasons: ['Produk skincare rutin membuka peluang pembelian ulang.', 'Rating tinggi membantu membangun kepercayaan audiens.'] },
+      { id: 6, name: 'Lampu Meja LED Rechargeable 3 Mode', shop: 'Ruang Nyaman', category: 'Rumah tangga', price: 119000, sold: 4100, rating: 4.8, commission: 11, velocity: 31, score: 90, addedAt: '2026-09-23', variants: 3, icon: '💡', tint: '#f8f1d9', breakdown: { demand: 86, growth: 98, commission: 86, trust: 91 }, reasons: ['Kecepatan penjualan naik 31% dalam tujuh hari.', 'Manfaat produk terlihat jelas dalam konten meja kerja.'] },
+      { id: 7, name: 'Sunscreen SPF 50 PA++++ Ringan', shop: 'Sunvera Official', category: 'Kecantikan', price: 99000, sold: 9600, rating: 4.9, commission: 13, velocity: 20, score: 93, addedAt: '2026-09-17', variants: 2, icon: '☀️', tint: '#fff0d7', breakdown: { demand: 98, growth: 91, commission: 91, trust: 98 }, reasons: ['Volume penjualan besar dengan rating 4,9.', 'Kategori kebutuhan harian mendukung rekomendasi berulang.'] },
+      { id: 8, name: 'Sepatu Sneakers Unisex Cloud Run', shop: 'Stepwise Indonesia', category: 'Fashion', price: 219000, sold: 5200, rating: 4.7, commission: 14, velocity: 16, score: 89, addedAt: '2026-09-11', variants: 6, icon: '👟', tint: '#e7eef4', breakdown: { demand: 87, growth: 85, commission: 94, trust: 90 }, reasons: ['Nilai komisi per order tinggi untuk produk fashion.', 'Banyak pilihan ukuran dan warna memperluas audiens.'] },
+      { id: 9, name: 'Power Bank 10000mAh Fast Charging', shop: 'Volt Tech Official', category: 'Elektronik', price: 159000, sold: 7300, rating: 4.8, commission: 9, velocity: 27, score: 92, addedAt: '2026-09-19', variants: 2, icon: '🔋', tint: '#e7f0eb', breakdown: { demand: 93, growth: 95, commission: 82, trust: 94 }, reasons: ['Penjualan tumbuh 27% dan permintaan kategori kuat.', 'Kegunaan sehari-hari mudah dijelaskan dalam video.'] },
+      { id: 10, name: 'Organizer Dapur Rak Susun Serbaguna', shop: 'Dapur Rapi', category: 'Rumah tangga', price: 84900, sold: 3800, rating: 4.7, commission: 12, velocity: 14, score: 83, addedAt: '2026-09-06', variants: 3, icon: '🧺', tint: '#f0e9dc', breakdown: { demand: 82, growth: 80, commission: 89, trust: 87 }, reasons: ['Konten sebelum dan sesudah dapat menunjukkan manfaat nyata.', 'Harga terjangkau mendukung keputusan pembelian cepat.'] },
+      { id: 11, name: 'Kemeja Linen Pria Lengan Pendek', shop: 'Harbor Wear', category: 'Fashion', price: 139000, sold: 6400, rating: 4.8, commission: 16, velocity: 11, score: 88, addedAt: '2026-09-15', variants: 7, icon: '👕', tint: '#e4edf1', breakdown: { demand: 89, growth: 78, commission: 98, trust: 92 }, reasons: ['Komisi 16% dan volume terjual sudah kuat.', 'Pilihan warna cocok untuk konten padu padan.'] },
+      { id: 12, name: 'Vacuum Cleaner Mini Nirkabel', shop: 'CleanDay Store', category: 'Rumah tangga', price: 279000, sold: 2200, rating: 4.7, commission: 10, velocity: 35, score: 86, addedAt: '2026-09-24', variants: 2, icon: '🧹', tint: '#e8eef4', breakdown: { demand: 76, growth: 99, commission: 86, trust: 87 }, reasons: ['Pertumbuhan tercepat di daftar ini, naik 35%.', 'Demonstrasi pembersihan memberi bukti manfaat yang kuat.'] },
+      { id: 13, name: 'Lip Tint Velvet Tahan Lama', shop: 'Mira Beauty', category: 'Kecantikan', price: 59000, sold: 11200, rating: 4.9, commission: 17, velocity: 22, score: 96, addedAt: '2026-09-12', variants: 8, icon: '💄', tint: '#f7e5e9', breakdown: { demand: 99, growth: 93, commission: 99, trust: 98 }, reasons: ['Perpaduan 11,2 ribu penjualan dan komisi 17% sangat kuat.', 'Banyak shade memberi bahan konten swatch yang beragam.'] },
+      { id: 14, name: 'Tripod HP Fleksibel dengan Remote', shop: 'Creator Gear ID', category: 'Elektronik', price: 109000, sold: 4600, rating: 4.8, commission: 13, velocity: 29, score: 91, addedAt: '2026-09-22', variants: 2, icon: '📷', tint: '#e6eaf1', breakdown: { demand: 84, growth: 97, commission: 91, trust: 92 }, reasons: ['Relevan langsung dengan kebutuhan pembuat konten.', 'Penjualan naik 29% dalam sepekan.'] },
+      { id: 15, name: 'Sprei Microfiber Set Motif Minimalis', shop: 'Tidur Nyenyak', category: 'Rumah tangga', price: 175000, sold: 3100, rating: 4.8, commission: 8, velocity: 8, score: 79, addedAt: '2026-09-02', variants: 9, icon: '🛏️', tint: '#f0e8ed', breakdown: { demand: 79, growth: 72, commission: 79, trust: 92 }, reasons: ['Motif bervariasi untuk rekomendasi dekorasi kamar.', 'Rating 4,8 memberi sinyal kualitas yang konsisten.'] },
+      { id: 16, name: 'Headphone Bluetooth Wireless Bass Pro', shop: 'Sonic Plus', category: 'Elektronik', price: 239000, sold: 6700, rating: 4.8, commission: 11, velocity: 25, score: 92, addedAt: '2026-09-20', variants: 3, icon: '🎧', tint: '#e8e9f4', breakdown: { demand: 92, growth: 94, commission: 89, trust: 93 }, reasons: ['Gabungan volume dan pertumbuhan penjualan kuat.', 'Fitur suara dan panggilan cocok untuk ulasan perbandingan.'] },
+      { id: 17, name: 'Cardigan Rajut Oversize Wanita', shop: 'Lune Official Store', category: 'Fashion', price: 149000, sold: 2600, rating: 4.8, commission: 18, velocity: 19, score: 85, addedAt: '2026-09-18', variants: 6, icon: '🧥', tint: '#eee6df', breakdown: { demand: 76, growth: 85, commission: 99, trust: 92 }, reasons: ['Persentase komisi tertinggi di katalog.', 'Gaya oversize mendukung beberapa ide styling.'] },
+      { id: 18, name: 'Cushion Matte Coverage SPF 35', shop: 'Glow Lab Indonesia', category: 'Kecantikan', price: 135000, sold: 4800, rating: 4.8, commission: 14, velocity: 17, score: 88, addedAt: '2026-09-10', variants: 5, icon: '🪞', tint: '#f6e9df', breakdown: { demand: 87, growth: 85, commission: 94, trust: 92 }, reasons: ['Harga dan komisi memberi hasil per order yang menarik.', 'Pilihan shade mendukung konten uji pemakaian.'] },
+      { id: 19, name: 'Botol Minum Stainless 1 Liter', shop: 'Daily Goods ID', category: 'Rumah tangga', price: 79000, sold: 8900, rating: 4.9, commission: 6, velocity: 30, score: 82, addedAt: '2026-09-25', variants: 5, icon: '🥤', tint: '#e5f1ee', breakdown: { demand: 96, growth: 97, commission: 66, trust: 97 }, reasons: ['Produk baru dengan volume penjualan kuat.', 'Kebutuhan harian cocok untuk rekomendasi praktis.'] },
+      { id: 20, name: 'Hair Dryer Ion Lipat Travel', shop: 'Belle Tools', category: 'Kecantikan', price: 199000, sold: 1900, rating: 4.7, commission: 12, velocity: 33, score: 84, addedAt: '2026-09-25', variants: 2, icon: '💨', tint: '#eee9f4', breakdown: { demand: 73, growth: 98, commission: 90, trust: 86 }, reasons: ['Produk baru dengan kenaikan penjualan 33%.', 'Desain lipat mudah ditampilkan lewat demo singkat.'] }
+    ].map(product => ({ ...product, commissionPerOrder: Math.round(product.price * product.commission / 100) }));
+
+    const state = { query: '', category: 'all', priceRange: 'all', minSold: 0, minRating: 0, minCommission: 0, tab: 'opportunities', sort: 'tab', page: 1, perPage: 8, view: 'discover', selectedId: null };
+    const savedKey = 'affiliate-hunter-watchlist-v1';
+    let savedIds;
+    try {
+      const stored = JSON.parse(localStorage.getItem(savedKey));
+      savedIds = new Set(Array.isArray(stored) ? stored.filter(id => catalogue.some(product => product.id === id)) : catalogue.slice(0, 12).map(product => product.id));
+    } catch (_) {
+      savedIds = new Set(catalogue.slice(0, 12).map(product => product.id));
+    }
+    const rupiah = value => 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+    const soldLabel = value => value >= 1000 ? new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 }).format(value / 1000) + ' rb' : new Intl.NumberFormat('id-ID').format(value);
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+
+    function filteredProducts() {
+      const query = state.query.trim().toLocaleLowerCase('id-ID');
+      const sort = state.sort === 'tab' ? state.tab : state.sort;
+      const inPriceRange = product => {
+        if (state.priceRange === 'under100') return product.price < 100000;
+        if (state.priceRange === '100to200') return product.price >= 100000 && product.price <= 200000;
+        if (state.priceRange === 'over200') return product.price > 200000;
+        return true;
+      };
+      const products = catalogue.filter(product =>
+        (state.view !== 'watchlist' || savedIds.has(product.id)) &&
+        (state.category === 'all' || product.category === state.category) &&
+        inPriceRange(product) &&
+        product.sold >= state.minSold &&
+        product.rating >= state.minRating &&
+        product.commission >= state.minCommission &&
+        (!query || [product.name, product.shop, product.category].some(value => value.toLocaleLowerCase('id-ID').includes(query)))
+      );
+      const valueFor = {
+        opportunities: product => product.score,
+        trending: product => product.velocity,
+        latest: product => Date.parse(product.addedAt),
+        commission: product => product.commission,
+        sold: product => product.sold
+      }[sort];
+      return products.sort((a, b) => valueFor(b) - valueFor(a) || b.score - a.score || a.id - b.id);
+    }
+
+    function renderTable(products = filteredProducts()) {
+      const start = (state.page - 1) * state.perPage;
+      const pageProducts = products.slice(start, start + state.perPage);
+      const body = document.getElementById('productTableBody');
+      if (!pageProducts.length) {
+        body.innerHTML = '<tr><td class="empty-state" colspan="8">Tidak ada produk yang cocok. Coba kata kunci atau filter lain.</td></tr>';
+        return;
+      }
+      body.innerHTML = pageProducts.map(product => `<tr data-product-id="${product.id}" tabindex="0" aria-label="Details for ${escapeHTML(product.name)}">
+        <td><div class="product-cell"><div class="product-thumb" style="--thumb:${product.tint}" aria-hidden="true">${product.icon}</div><div><div class="product-name" title="${escapeHTML(product.name)}">${escapeHTML(product.name)}</div><div class="product-sub">${escapeHTML(product.category)} · ${product.variants} varian</div></div></div></td>
+        <td><div class="shop-cell"><span class="shop-check" aria-hidden="true">●</span> ${escapeHTML(product.shop)}</div></td>
+        <td>${rupiah(product.price)}</td><td><span class="commission">${product.commission}%</span></td><td>${rupiah(product.commissionPerOrder)}</td>
+        <td>${soldLabel(product.sold)} <span class="trend">↗ ${product.velocity}%</span></td><td><span class="score${product.score < 80 ? ' mid' : ''}">✦ ${product.score}</span></td>
+        <td><div class="row-actions"><button class="save-action${savedIds.has(product.id) ? ' saved' : ''}" type="button" data-save-id="${product.id}" aria-label="${savedIds.has(product.id) ? 'Remove' : 'Save'} ${escapeHTML(product.name)} ${savedIds.has(product.id) ? 'from' : 'to'} watchlist" aria-pressed="${savedIds.has(product.id)}">${savedIds.has(product.id) ? '★' : '☆'}</button><button class="row-action" type="button" data-product-id="${product.id}" aria-label="View details for ${escapeHTML(product.name)}">···</button></div></td>
+      </tr>`).join('');
+    }
+
+    function renderPagination(products = filteredProducts()) {
+      const total = products.length;
+      const pageCount = Math.max(1, Math.ceil(total / state.perPage));
+      state.page = Math.min(Math.max(1, state.page), pageCount);
+      const from = total ? (state.page - 1) * state.perPage + 1 : 0;
+      const to = Math.min(state.page * state.perPage, total);
+      document.getElementById('resultSummary').innerHTML = `Showing <strong>${from}–${to}</strong> of <strong>${total}</strong> products`;
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      function addPage(label, page, ariaLabel, disabled = false) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'page-button' + (page === state.page && !ariaLabel ? ' current' : '');
+        button.textContent = label;
+        button.dataset.page = String(page);
+        if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
+        if (page === state.page && !ariaLabel) button.setAttribute('aria-current', 'page');
+        button.disabled = disabled;
+        pagination.append(button);
+      }
+      addPage('‹', state.page - 1, 'Previous page', state.page === 1);
+      for (let page = 1; page <= pageCount; page++) addPage(String(page), page);
+      addPage('›', state.page + 1, 'Next page', state.page === pageCount);
+    }
+
+    function applyFilters(resetPage = true) {
+      if (resetPage) state.page = 1;
+      const products = filteredProducts();
+      renderPagination(products);
+      renderTable(products);
+      document.getElementById('tabCount').textContent = String(state.view === 'watchlist' ? savedIds.size : catalogue.length);
+      const titles = { opportunities: 'Top opportunities', trending: 'Trending products', latest: 'Latest products', commission: 'Highest commission' };
+      document.getElementById('catalogue-heading').textContent = state.view === 'watchlist' ? 'My watchlist' : titles[state.tab];
+      const destination = state.view === 'watchlist' ? '#watchlist' : state.tab === 'trending' ? '#trending' : '#catalogue';
+      document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+        const active = item.getAttribute('href') === destination;
+        item.classList.toggle('active', active);
+        if (active) item.setAttribute('aria-current', 'page');
+        else item.removeAttribute('aria-current');
+      });
+      const pageTitle = state.view === 'watchlist' ? 'My Watchlist' : state.tab === 'trending' ? 'Trending Products' : 'Find products worth promoting';
+      document.querySelector('h1').textContent = pageTitle;
+      document.querySelector('.crumbs strong').textContent = pageTitle;
+      document.querySelector('.subtitle').textContent = state.view === 'watchlist' ? 'Produk yang kamu simpan untuk ditinjau lagi.' : state.tab === 'trending' ? 'Produk dengan pertumbuhan penjualan tercepat saat ini.' : 'Discover high-potential Shopee Affiliate products using real data and AI analysis.';
+    }
+
+    const drawer = document.getElementById('drawer');
+    const modal = document.getElementById('ideasModal');
+    let drawerTrigger = null;
+    let modalTrigger = null;
+    let toastTimer;
+
+    function setBackgroundInert(value) {
+      document.querySelector('.app-main').inert = value;
+      document.querySelector('.sidebar').inert = value;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function breakdownFor(product) {
+      // Allocate the catalogue's overall score across the six weighted signals.
+      const signals = [
+        ['Demand', 25, product.breakdown.demand],
+        ['Commission', 20, product.breakdown.commission],
+        ['Rating', 10, product.breakdown.trust],
+        ['Price', 10, Math.max(60, Math.min(98, 100 - product.price / 10000))],
+        ['Content Potential', 20, Math.min(99, product.breakdown.growth * .8 + product.variants * 2)],
+        ['Competition', 15, Math.max(60, 98 - product.sold / 1200)]
+      ];
+      const raw = signals.map(([, max, signal]) => max * (100 - signal) / 100);
+      const rawTotal = raw.reduce((sum, value) => sum + value, 0);
+      const targetDeficit = 100 - product.score;
+      const exact = raw.map(value => targetDeficit * value / rawTotal);
+      const deficits = exact.map(value => Math.floor(value));
+      let remainder = targetDeficit - deficits.reduce((sum, value) => sum + value, 0);
+      const order = exact.map((value, index) => index).sort((a, b) => (exact[b] - deficits[b]) - (exact[a] - deficits[a]));
+      for (const index of order) {
+        if (!remainder) break;
+        if (deficits[index] < signals[index][1]) { deficits[index]++; remainder--; }
+      }
+      return signals.map(([label, max], index) => ({ label, max, points: max - deficits[index] }));
+    }
+
+    function updateDrawerSave(product) {
+      const button = document.getElementById('drawerSave');
+      const saved = savedIds.has(product.id);
+      button.textContent = saved ? '★ Remove from watchlist' : '☆ Save to watchlist';
+      button.setAttribute('aria-pressed', String(saved));
+    }
+
+    const isDesktopReference = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1200px)').matches;
+
+    function openDrawer(product, trigger) {
+      drawerTrigger = trigger;
+      state.selectedId = product.id;
+      const thumb = document.getElementById('drawerThumb');
+      thumb.textContent = product.icon;
+      thumb.style.backgroundColor = product.tint;
+      document.getElementById('drawerName').textContent = product.name;
+      document.getElementById('drawerShop').textContent = `${product.shop} · ${product.category}`;
+      document.getElementById('drawerPrice').textContent = rupiah(product.price);
+      document.getElementById('drawerCommission').textContent = `${product.commission}%`;
+      document.getElementById('drawerEarnings').textContent = rupiah(product.commissionPerOrder);
+      document.getElementById('drawerScore').textContent = `${product.score} / 100`;
+      document.getElementById('scoreBreakdown').innerHTML = breakdownFor(product).map(part => `<div><div class="score-label"><span>${part.label}</span><strong>${part.points} / ${part.max}</strong></div><div class="score-track"><div class="score-fill" style="width:${part.points / part.max * 100}%"></div></div></div>`).join('');
+      document.getElementById('drawerReasons').innerHTML = product.reasons.map(reason => `<li>${escapeHTML(reason)}</li>`).join('');
+      document.getElementById('drawerSignals').textContent = `${soldLabel(product.sold)} terjual · naik ${product.velocity}% dalam 7 hari · Rating ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 1 }).format(product.rating)} ★`;
+      updateDrawerSave(product);
+      if (!isDesktopReference()) setBackgroundInert(true);
+      drawer.inert = false;
+      drawer.setAttribute('aria-hidden', 'false');
+      document.querySelector('.drawer-scrim').classList.add('open');
+      if (!isDesktopReference()) document.getElementById('drawerClose').focus();
+    }
+
+    function closeDrawer() {
+      if (drawer.getAttribute('aria-hidden') === 'true') return;
+      document.querySelector('.drawer-scrim').classList.remove('open');
+      if (!isDesktopReference()) setBackgroundInert(false);
+      if (drawerTrigger?.isConnected) drawerTrigger.focus();
+      else document.getElementById('searchInput').focus();
+      drawer.setAttribute('aria-hidden', 'true');
+      drawer.inert = true;
+    }
+
+    function toggleSaved(product, tableTrigger = null) {
+      if (savedIds.has(product.id)) savedIds.delete(product.id);
+      else savedIds.add(product.id);
+      try { localStorage.setItem(savedKey, JSON.stringify([...savedIds])); } catch (_) { /* Local storage can be unavailable. */ }
+      document.getElementById('watchlistBadge').textContent = String(savedIds.size);
+      document.getElementById('watchlistCount').textContent = String(savedIds.size);
+      if (state.selectedId === product.id) updateDrawerSave(product);
+      applyFilters(false);
+      if (tableTrigger) {
+        const replacement = document.querySelector(`#productTableBody button[data-save-id="${product.id}"]`);
+        const watchlistLink = document.querySelector('.sidebar .nav-item[href="#watchlist"]');
+        (replacement || (state.view === 'watchlist' ? watchlistLink : null) || document.getElementById('searchInput')).focus();
+      }
+      showToast(savedIds.has(product.id) ? 'Saved to your watchlist' : 'Removed from your watchlist');
+    }
+
+    function setView(view, tab = state.tab) {
+      state.view = view;
+      state.tab = tab;
+      state.sort = 'tab';
+      document.getElementById('sortFilter').value = 'tab';
+      state.page = 1;
+      document.querySelectorAll('.tab[data-tab]').forEach(item => {
+        const selected = item.dataset.tab === state.tab;
+        item.classList.toggle('active', selected);
+        item.setAttribute('aria-selected', String(selected));
+      });
+      applyFilters(false);
+    }
+
+    function contentIdeasFor(product) {
+      const categoryPrompt = {
+        Elektronik: ['aktivitas harian yang terganggu perangkat lama', 'uji fitur utama dalam situasi sehari-hari'],
+        Fashion: ['bingung memilih gaya yang mudah dipakai', 'tunjukkan beberapa padu padan atau varian'],
+        'Rumah tangga': ['rutinitas rumah yang terasa kurang praktis', 'perlihatkan perubahan ruang atau pekerjaan secara langsung'],
+        Kecantikan: ['rutinitas perawatan yang terasa rumit', 'tunjukkan cara pakai dan hasil visual secara jujur']
+      }[product.category];
+      return [
+        ['Problem–Solution', `Mulai dari ${categoryPrompt[0]}, lalu tunjukkan bagaimana ${product.name} membantu. Akhiri dengan hasil yang bisa dilihat penonton.`],
+        ['Before/After', `Bandingkan kondisi sebelum dan sesudah memakai ${product.name}. Gunakan sudut kamera dan pencahayaan yang sama agar perubahan mudah dinilai.`],
+        ['Satisfying Demo', `Buka dengan close-up ${product.name}; ${categoryPrompt[1]}. Tambahkan suara asli produk untuk menjaga kesan autentik.`],
+        ['Product Discovery', `"Aku menemukan ${product.name} dari ${product.shop}." Ceritakan fitur yang paling mengejutkan, harga ${rupiah(product.price)}, dan siapa yang akan terbantu.`],
+        ['Comparison', `Bandingkan ${product.name} dengan alternatif yang umum dipakai. Sorot harga, fitur, serta rating ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 1 }).format(product.rating)} tanpa mengklaim hasil yang belum diuji.`]
+      ];
+    }
+
+    function openIdeas(product, trigger) {
+      if (!product) { showToast('Pilih produk untuk membuat ide konten.'); return; }
+      modalTrigger = trigger;
+      document.getElementById('ideasIntro').textContent = `Lima hook konten untuk ${product.name}. Sesuaikan dengan pengalamanmu saat mencoba produk.`;
+      document.getElementById('ideasList').innerHTML = contentIdeasFor(product).map(([name, hook]) => `<article class="idea-card"><strong>${escapeHTML(name)}</strong><p>${escapeHTML(hook)}</p></article>`).join('');
+      setBackgroundInert(true);
+      if (drawer.getAttribute('aria-hidden') === 'false') drawer.inert = true;
+      modal.inert = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.getElementById('ideasClose').focus();
+    }
+
+    function closeIdeas() {
+      if (modal.getAttribute('aria-hidden') === 'true') return;
+      if (drawer.getAttribute('aria-hidden') === 'false') drawer.inert = false;
+      else setBackgroundInert(false);
+      if (modalTrigger?.isConnected) modalTrigger.focus();
+      else document.getElementById('searchInput').focus();
+      modal.setAttribute('aria-hidden', 'true');
+      modal.inert = true;
+    }
+
+    function trapFocus(container, event) {
+      const controls = [...container.querySelectorAll('button:not(:disabled), [tabindex="0"]')];
+      if (!controls.length) return;
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+
+    for (const input of [document.getElementById('searchInput'), document.getElementById('globalSearchInput')]) {
+      input.addEventListener('input', event => {
+        state.query = event.target.value;
+        for (const other of [document.getElementById('searchInput'), document.getElementById('globalSearchInput')]) {
+          if (other !== event.target) other.value = state.query;
+        }
+        applyFilters();
+      });
+    }
+    document.getElementById('categoryFilter').addEventListener('change', event => { state.category = event.target.value; applyFilters(); });
+    document.getElementById('priceFilter').addEventListener('change', event => { state.priceRange = event.target.value; applyFilters(); });
+    document.getElementById('soldFilter').addEventListener('change', event => { state.minSold = Number(event.target.value); applyFilters(); });
+    document.getElementById('ratingFilter').addEventListener('change', event => { state.minRating = Number(event.target.value); applyFilters(); });
+    document.getElementById('commissionFilter').addEventListener('change', event => { state.minCommission = Number(event.target.value); applyFilters(); });
+    document.getElementById('sortFilter').addEventListener('change', event => { state.sort = event.target.value; applyFilters(); });
+    document.getElementById('huntButton').addEventListener('click', () => {
+      applyFilters();
+      const count = filteredProducts().length;
+      showToast(`Hunt complete — ${count} product${count === 1 ? '' : 's'} match your filters.`);
+    });
+    document.querySelectorAll('.tab[data-tab]').forEach(tab => tab.addEventListener('click', () => {
+      state.tab = tab.dataset.tab;
+      state.sort = 'tab';
+      document.getElementById('sortFilter').value = 'tab';
+      document.querySelectorAll('.tab[data-tab]').forEach(item => {
+        const selected = item === tab;
+        item.classList.toggle('active', selected);
+        item.setAttribute('aria-selected', String(selected));
+      });
+      applyFilters();
+    }));
+    document.getElementById('pagination').addEventListener('click', event => {
+      const button = event.target.closest('button[data-page]');
+      if (!button || button.disabled) return;
+      state.page = Number(button.dataset.page);
+      applyFilters(false);
+      document.querySelector('#pagination button[aria-current="page"]')?.focus();
+    });
+    document.getElementById('productTableBody').addEventListener('click', event => {
+      const save = event.target.closest('button[data-save-id]');
+      if (save) {
+        toggleSaved(catalogue.find(product => product.id === Number(save.dataset.saveId)), save);
+        return;
+      }
+      const row = event.target.closest('tr[data-product-id]');
+      if (!row) return;
+      const product = catalogue.find(item => item.id === Number(row.dataset.productId));
+      openDrawer(product, event.target.closest('button') || row);
+    });
+    document.getElementById('productTableBody').addEventListener('keydown', event => {
+      if (event.target.matches('tr[data-product-id]') && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        const product = catalogue.find(item => item.id === Number(event.target.dataset.productId));
+        openDrawer(product, event.target);
+      }
+    });
+    document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+    document.querySelector('.drawer-scrim').addEventListener('click', closeDrawer);
+    document.getElementById('drawerSave').addEventListener('click', () => toggleSaved(catalogue.find(product => product.id === state.selectedId)));
+    document.getElementById('drawerIdeas').addEventListener('click', event => openIdeas(catalogue.find(product => product.id === state.selectedId), event.currentTarget));
+    document.getElementById('drawerShopee').addEventListener('click', () => showToast('Prototype preview only — Shopee link is not connected.'));
+    document.getElementById('generateIdeasButton').addEventListener('click', event => openIdeas(filteredProducts()[0], event.currentTarget));
+    document.getElementById('ideasClose').addEventListener('click', closeIdeas);
+    modal.addEventListener('click', event => { if (event.target === modal) closeIdeas(); });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        if (modal.getAttribute('aria-hidden') === 'false') closeIdeas();
+        else if (drawer.getAttribute('aria-hidden') === 'false') closeDrawer();
+      } else if (event.key === 'Tab') {
+        if (modal.getAttribute('aria-hidden') === 'false') trapFocus(modal, event);
+        else if (drawer.getAttribute('aria-hidden') === 'false') trapFocus(drawer, event);
+      }
+    });
+    document.querySelectorAll('.sidebar .nav-item').forEach(item => item.addEventListener('click', event => {
+      event.preventDefault();
+      const destination = item.getAttribute('href');
+      if (destination === '#catalogue') setView('discover', 'opportunities');
+      else if (destination === '#trending') setView('discover', 'trending');
+      else if (destination === '#watchlist') setView('watchlist');
+      else showToast(`${item.getAttribute('aria-label')} — Coming Soon`);
+    }));
+    document.getElementById('refreshButton').addEventListener('click', () => showToast('Demo data is up to date.'));
+    document.getElementById('notificationsButton').addEventListener('click', () => showToast('Notifications — Coming Soon'));
+    document.getElementById('watchlistBadge').textContent = String(savedIds.size);
+    document.getElementById('watchlistCount').textContent = String(savedIds.size);
+    applyFilters();
+    // The supplied desktop reference has a selected product visible on load.
+    if (isDesktopReference()) openDrawer(catalogue[0], null);
+  </script>
+</body>
+</html>
