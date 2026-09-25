@@ -1,4 +1,4 @@
-import { Flame, Package, Star, TrendingUp } from "lucide-react";
+import { ArrowUp, Flame, Package, Star, TrendingUp } from "lucide-react";
 
 type KpiStripProps = {
   productsScanned: number;
@@ -24,7 +24,7 @@ export function KpiStrip({ productsScanned, highOpportunity, trendingProducts, a
         <article className={`kpi-card kpi-${tone}`} key={label}>
           <div className="kpi-icon" aria-hidden="true"><Icon size={26} strokeWidth={2.3} /></div>
           <div className="kpi-content">
-            <div className="kpi-value-line"><strong>{value}</strong><span className="kpi-change">↑ {change}</span></div>
+            <div className="kpi-value-line"><strong>{value}</strong><span className="kpi-change"><ArrowUp size={12} strokeWidth={2.5} aria-hidden="true" />{change}</span></div>
             <div className="kpi-label">{label}</div>
             <div className="kpi-note">{note}</div>
           </div>
