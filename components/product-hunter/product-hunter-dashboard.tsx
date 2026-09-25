@@ -10,13 +10,11 @@ export function ProductHunterDashboard(): React.JSX.Element {
   return (
     <div className="dashboard-shell">
       <AppSidebar />
-      <div className="dashboard-center">
-        <TopSearch query={query} onQueryChange={setQuery} />
-        <main className="dashboard-content" id="discover">
-          <h1>Find products worth promoting</h1>
-          <p>Discover high-potential Shopee Affiliate products using real data and AI analysis.</p>
-        </main>
-      </div>
+      <TopSearch query={query} onQueryChange={setQuery} />
+      <main className="dashboard-content" id="discover">
+        <h1>Find products worth promoting</h1>
+        <p>Discover high-potential Shopee Affiliate products using real data and AI analysis.</p>
+      </main>
       <aside className="detail-region" aria-label="Product details" />
     </div>
   );

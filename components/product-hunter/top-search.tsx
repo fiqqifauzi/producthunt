@@ -1,4 +1,4 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, ChevronDown, Search } from "lucide-react";
 
 export type TopSearchProps = {
   query: string;
@@ -22,8 +22,13 @@ export function TopSearch({ query, onQueryChange }: TopSearchProps): React.JSX.E
       <div className="top-search-actions">
         <button className="notification-button" type="button" aria-label="Notifications">
           <Bell size={20} aria-hidden="true" />
+          <span className="notification-dot" aria-hidden="true" />
         </button>
-        <span className="user-avatar" aria-label="User account">F</span>
+        <div className="user-account" aria-label="User account">
+          <span className="user-avatar" aria-hidden="true">A</span>
+          <span className="user-account-copy"><strong>Akun Saya</strong><small>Affiliate Creator</small></span>
+          <ChevronDown size={16} aria-hidden="true" />
+        </div>
       </div>
     </header>
   );

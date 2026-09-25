@@ -11,4 +11,20 @@ describe("ProductHunterDashboard", () => {
     expect(screen.getByText("DISCOVERY")).toBeInTheDocument();
     expect(screen.getByText("Find products worth promoting")).toBeInTheDocument();
   });
+
+  it("keeps every navigation link named when mobile labels are hidden", () => {
+    const mobileStyle = document.createElement("style");
+    mobileStyle.textContent = ".navigation-item-label, .coming-soon { display: none; }";
+    document.head.appendChild(mobileStyle);
+
+    try {
+      render(<ProductHunterDashboard />);
+
+      for (const name of ["Discover", "Trending", "Watchlist", "Niche Hunter", "Winning Products", "AI Content", "Performance", "Settings"]) {
+        expect(screen.getByRole("link", { name })).toBeInTheDocument();
+      }
+    } finally {
+      mobileStyle.remove();
+    }
+  });
 });
