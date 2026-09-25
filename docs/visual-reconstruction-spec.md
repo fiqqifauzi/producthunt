@@ -2,26 +2,53 @@
 
 ## Objective
 
-Reconstruct the supplied 1536 × 1024 desktop reference as a functional, standalone Product Hunter dashboard. The screenshot is the visual source of truth for placement, proportions, density, colors, and hierarchy.
+Reconstruct the supplied 1536 × 1024 desktop reference as a production-oriented Product Hunter dashboard. The screenshot is the visual source of truth for placement, proportions, density, colors, and hierarchy; the attached mockup brief is the source of truth for the application engine, component libraries, interaction architecture, and accessibility behavior.
 
 ## Engine and Library Contract
 
-The V1 artifact and the future production application use different runtimes intentionally:
+This implementation uses the production-oriented stack from the mockup brief:
 
-| Layer | V1 standalone prototype | Production application |
-| --- | --- | --- |
-| Runtime | Semantic HTML + vanilla JavaScript | Next.js App Router + React + TypeScript |
-| Styling | Embedded CSS using Tailwind-compatible semantic tokens and spacing values | Tailwind CSS with CSS-variable tokens |
-| Components | Accessible native elements with shadcn-compatible states and geometry | shadcn/ui |
-| Icons | Embedded inline SVG from the Lucide icon language; no emoji or platform glyphs | `lucide-react` |
-| Table | Deterministic local state and DOM rendering | TanStack Table |
-| Charts | None on Discover | Recharts only for Niche Hunter and Performance |
+| Layer | Required implementation |
+| --- | --- |
+| Runtime | Next.js App Router + React + TypeScript |
+| Styling | Tailwind CSS with semantic CSS-variable tokens |
+| Components | shadcn/ui primitives and interaction conventions |
+| Icons | `lucide-react`; no emoji, Unicode substitutes, or remote icon fonts |
+| Table | TanStack Table |
+| Charts | Recharts only when Niche Hunter and Performance are implemented |
+| Data | Typed local fixtures behind an adapter boundary, ready for an official API |
 
-The V1 file must remain fully functional without a build step or required network dependency. Tailwind CDN, React CDN, remote icon fonts, and remote image URLs are therefore excluded. This preserves the original offline-delivery constraint while keeping naming, tokens, icons, and interaction contracts migration-ready.
+No single-file or CDN implementation is required. Packages are installed through the project package manager and the application must provide standard development and production build commands.
+
+### Proposed source structure
+
+```text
+app/
+  layout.tsx
+  page.tsx
+  globals.css
+components/
+  product-hunter/
+    app-sidebar.tsx
+    top-search.tsx
+    discovery-filters.tsx
+    kpi-strip.tsx
+    product-table.tsx
+    opportunity-score.tsx
+    product-detail-sheet.tsx
+    content-ideas-dialog.tsx
+    product-hunter-dashboard.tsx
+data/
+  products.ts
+lib/
+  opportunity-score.ts
+  product-filters.ts
+  types.ts
+```
 
 ### Icon rules
 
-- Use Lucide-style 24 × 24 SVGs with `stroke="currentColor"`, round caps, and round joins.
+- Use components from `lucide-react` with the standard 24 × 24 view box, `currentColor` stroke, round caps, and round joins.
 - Use 18–20 px icons for sidebar navigation, 16–18 px for controls and row actions, and 14–16 px for compact status affordances.
 - Every icon-only button requires an accessible label and visible focus state.
 - Use icons matching the brief: Search, Bell, Home, Flame, Heart, Target, Trophy, Sparkles, BarChart, Settings, SlidersHorizontal, ExternalLink, ChevronDown, ChevronLeft, ChevronRight, Star, Package, TrendingUp, X, and Check.
@@ -60,7 +87,7 @@ The V1 file must remain fully functional without a build step or required networ
 
 ### v1-shell
 
-Dark navy sidebar with Product Hunter mark and four navigation group labels; white top search bar; fixed desktop detail panel. Main content remains readable when the panel is open. Replace emoji and text-symbol icons with embedded Lucide-style SVG components.
+Dark navy sidebar with Product Hunter mark and four navigation group labels; white top search bar; fixed desktop detail panel. Main content remains readable when the panel is open. Use `lucide-react` icons throughout.
 
 ### v2-discovery
 
@@ -76,13 +103,13 @@ Selected product includes source, main image + thumbnail rail, price/rating/sold
 
 ### v5-polish
 
-Existing search, filtering, tabs, sorting, watchlist, pagination, row-count selection, drawer, score popover, content modal, keyboard behavior, and basic responsive mode are retained. Add loading skeleton, empty, error, and stale-data presentation. At desktop dimensions visual geometry takes precedence; smaller screens may use an overlay drawer.
+Search, filtering, tabs, sorting, watchlist, pagination, row-count selection, drawer, score popover, content modal, keyboard behavior, and responsive mode are implemented as typed React components. Add loading skeleton, empty, error, and stale-data presentation. At desktop dimensions visual geometry takes precedence; smaller screens may use an overlay drawer.
 
 ## Interaction Architecture
 
-- Search and filters use controlled local state with a short debounce and update shareable URL query parameters when the page runs over HTTP; direct-file use continues to work.
-- Product sorting, filters, row selection, column visibility, pagination, and page-size selection follow TanStack Table behavior even though V1 implements them in vanilla JavaScript.
-- Drawer and modal follow shadcn Sheet/Dialog conventions: Escape close, focus trap, focus restoration, labelled title, and inert background when modal.
+- Search and filters use typed React controlled state, a short debounce, and shareable URL search parameters.
+- Product sorting, filters, row selection, column visibility, pagination, and page-size selection use TanStack Table directly.
+- Drawer and modal use shadcn Sheet/Dialog primitives: Escape close, focus trap, focus restoration, labelled title, and inert background when modal.
 - Watchlist uses optimistic local state persisted in `localStorage`.
 - Opportunity Score is a deterministic function returning total, six weighted factors, and explanation reasons.
 - Content ideas receive the selected product context and return exactly five initial angles defined in the brief.
